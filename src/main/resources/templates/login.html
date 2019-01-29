@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Add Employee Form</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    </head>
+    <body>
+     
+              
+        
+        <div id="emp-table"></div>
+
+        <!-- The Modal -->
+        <div class="modal" id="myModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h5 class="modal-title">ADD A NEW EMPLOYEE</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <!-- Modal body -->
+                    <div class="modal-body">
+                        <form id="myForm">
+                            <p>First Name: <input type="text" id="firstName" placeholder="" name="firstName" /></p>
+                            <p>Last Name: <input type="text" id="lastName" placeholder="" name="lastName" /></p>
+                            <p>Email <input type="text" id="email" placeholder="" name="email" /></p>
+                            <p>Designation <input type="text" id="designation" placeholder="" name="designation" /></p>
+                            <p>Address <input type="text" id="address" placeholder="" name="address" /></p>
+                            <input type="hidden"  id="empid"/>
+                            <p><input class="btn btn-danger" type="button" onclick="saveEmployee()" value="Submit" /> </p>
+                        </form>
+                    </div>
+
+                    <!-- Modal footer -->
+                    <!--                    <div class="modal-footer">
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                        </div>-->
+                </div>
+            </div>
+        </div>
+  <form action="#" th:action="@{/logout}" method="post">					
+      <input type="submit" value="Logout" styl />
+                </form>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+        <script type="text/javascript">
+                                getEmployees();
+                                function getEmployees() {
+
+                                    $.get("/api/employee/", )
+                                            .done(function (data) {
+
+                                                console.log("Data Loaded: ", data);
+                                                createTable(data);
+                                            });
+                                }
+
+                                function createTable(data) {
+                                    var html = '<table class="table table-bordered" id="myTable">';
+                                    html += '<tr>';
+                                    var flag = 0;
+                                    $.each(data[0], function (index, value) {
+                                        html += '<th>' + index + '</th>';
+                                    });
+                                    html += '</tr>';
+                                    $.each(data, function (index, value) {
+                                        html += '<tr>';
+                                        $.each(value, function (index2, value2) {
+                                            html += '<td>' + value2 + '</td>';
+                                        });
+                                        // html += '<button type="button">'+ Submit + '</button>';
+                                       
+                                        // html+= '<td> <button type="button" class="btn btn-danger">Delete</button></td>';
+                                        html += '</tr>';
+                                    });
+                                    html += '</table>';
+                                    $('#emp-table').html(html);
+                                }
+                                function deleteEmployee(empid) {
+                                    console.log(empid);
+                                    $.ajax({
+                                        url: '/api/employee/' + empid,
+                                        type: 'DELETE',
+                                        success: function (result) {
+
+                                            getEmployees();
+                                        }
+                                    });
+                                }
+
+                                function getEmployee(empid) {
+
+                                    $.ajax({
+                                        url: '/api/employee/' + empid,
+                                        type: 'GET',
+                                        success: function (data) {
+                                            console.log(data);
+                                            $('#myModal').modal('show');
+                                            $('#firstName').val(data.firstname);
+                                            $('#lastName').val(data.lastname);
+                                            $('#email').val(data.email);
+                                            $('#designation').val(data.designation);
+                                            $('#address').val(data.address);
+                                            $('#empid').val(empid)
+                                        }
+                                    });
+                                    //$("#myForm").trigger("reset");
+                                }
+
+                                function updateEmployee(empid) {
+                                    $.ajax({
+                                        url: '/api/employee/' + empid,
+                                        type: 'PUT',
+                                        data: data,
+                                        success: function (result) {
+                                            getEmployees();
+                                        }
+                                    });
+                                }
+
+
+
+                                function saveEmployee() {
+                                    var data = {
+                                        firstname: $('#firstName').val(),
+                                        lastname: $('#lastName').val(),
+                                        email: $('#email').val(),
+                                        designation: $('#designation').val(),
+                                        address: $('#address').val(),
+                                        empid: $('#empid').val()
+                                    };
+                                    console.log(data);
+                                    var method = "POST";
+                                    if (data.empid != "") {
+                                        method = "PUT";
+                                    }
+                                    $.ajax(
+                                            {
+
+                                                url: '/api/employee/' + data.empid,
+                                                type: method,
+                                                data: JSON.stringify(data),
+                                                contentType: "application/json",
+                                                success: function (result) {
+                                                    getEmployees();
+                                                    $("#myModal").modal('hide')
+                                                }
+                                            });
+
+                                    $("#myForm").trigger("reset");
+                                }
+
+        </script>
+    </body>
+</html>
